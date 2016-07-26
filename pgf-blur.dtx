@@ -67,7 +67,7 @@ DESCRIPTION:
 %</driver>
 %\fi
 %
-% \CheckSum{338}
+% \CheckSum{456}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -474,6 +474,19 @@ DESCRIPTION:
 %    \end{macrocode}
 %  \end{macro}
 %\end{macro}
+%\begin{macro}{\ifpgfbs@invert@fading}
+% An |\if| to control whether to invert the fading or not.
+%    \begin{macrocode}
+\newif\ifpgfbs@invert@fading
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\pgfbs@fading@count}
+% A |count| to make the names unique
+%    \begin{macrocode}
+\newcount\pgfbs@fading@count
+\pgfbs@fading@count=0\relax
+%    \end{macrocode}
+%\end{macro}
 %\begin{macro}{shadow blur radius}
 %\begin{macro}{shadow blur extra rounding}
 %\begin{macro}{shadow blur steps}
@@ -495,6 +508,7 @@ DESCRIPTION:
   /tikz/shadow blur extra rounding/.default=\pgfbs@radius,
   /tikz/shadow blur steps/.store in=\pgfbs@steps,
   /tikz/shadow blur steps=4,
+  /tikz/shadow blur invert/.is if=pgfbs@invert@fading,
   /tikz/shadow opacity/.store in=\pgfbs@opacity,
   /tikz/shadow opacity=40,
 %    \end{macrocode}
@@ -532,14 +546,19 @@ DESCRIPTION:
 %    \begin{macrocode}
   /tikz/render blur shadow/.code={
     \pgfbs@savebb
+    \global\advance\pgfbs@fading@count by 1\relax
     \pgfsyssoftpath@getcurrentpath{\pgfbs@input@path}%
     \pgfbs@compute@shadow@bbox
     \pgfbs@process@rounding{\pgfbs@input@path}{\pgfbs@fadepath}%
     \pgfbs@apply@canvas@transform
     \colorlet{pstb@shadow@color}{white!\pgfbs@opacity!black}%
-    \pgfdeclarefading{shadowfading}{\pgfbs@paint@fading}%
+    \ifpgfbs@invert@fading
+    \pgfdeclarefading{shadowfading-\the\pgfbs@fading@count}{\pgfbs@paint@invert@fading}%
+    \else
+    \pgfdeclarefading{shadowfading-\the\pgfbs@fading@count}{\pgfbs@paint@fading}%
+    \fi
     \pgfsetfillcolor{black}%
-    \pgfsetfading{shadowfading}%
+    \pgfsetfading{shadowfading-\the\pgfbs@fading@count}%
        {\pgftransformshift{\pgfpoint{\pgfbs@midx}{\pgfbs@midy}}}%
     \pgfbs@usebbox{fill}%
     \pgfbs@restorebb
@@ -658,7 +677,7 @@ DESCRIPTION:
 %\begin{macro}{\pgfbs@shadow@bbox}
 % This macro figures out the bounding box of the shadow: it's the
 % same as the bounding box of the current path, but enlarged by
-% the blur radius in each direction.  It also computes the
+% twice (for the inverse shadow) the blur radius in each direction.  It also computes the
 % coordinates of the center of the bounding box.  These are
 % stored in macros |\pgfbs@|\{|min|$\mid$|mid|$\mid$|max|\}\{|x|$\mid$|y|\}.
 % It also creates a soft path for the bounding box which is stored in
@@ -671,10 +690,10 @@ DESCRIPTION:
   \edef\pgfbs@maxy{\the\pgf@pathmaxy}%
   \pgfmathsetmacro\pgfbs@midx{0.5*(\pgfbs@minx + \pgfbs@maxx)}%
   \pgfmathsetmacro\pgfbs@midy{0.5*(\pgfbs@miny + \pgfbs@maxy)}%
-  \pgfmathsetmacro\pgfbs@minx{\pgfbs@minx - \pgfbs@radius}%
-  \pgfmathsetmacro\pgfbs@miny{\pgfbs@miny - \pgfbs@radius}%
-  \pgfmathsetmacro\pgfbs@maxx{\pgfbs@maxx + \pgfbs@radius}%
-  \pgfmathsetmacro\pgfbs@maxy{\pgfbs@maxy + \pgfbs@radius}%
+  \pgfmathsetmacro\pgfbs@minx{\pgfbs@minx - 2*\pgfbs@radius}%
+  \pgfmathsetmacro\pgfbs@miny{\pgfbs@miny - 2*\pgfbs@radius}%
+  \pgfmathsetmacro\pgfbs@maxx{\pgfbs@maxx + 2*\pgfbs@radius}%
+  \pgfmathsetmacro\pgfbs@maxy{\pgfbs@maxy + 2*\pgfbs@radius}%
   \pgfmathsetmacro\pgfbs@wd{\pgfbs@maxx - \pgfbs@minx}%
   \pgfmathsetmacro\pgfbs@ht{\pgfbs@maxy - \pgfbs@miny}%
   \pgfsyssoftpath@setcurrentpath\pgfutil@empty%
@@ -731,6 +750,19 @@ DESCRIPTION:
 }
 %    \end{macrocode}
 %\end{macro}
+%\begin{macro}{\pgfbs@usefadeandbbox}
+% This is similar to the previous macros, but it `uses' both the fading path and the bounding box
+% path.
+%    \begin{macrocode}
+\def\pgfbs@usefadeandbbox#1{%
+  \let\pgfbs@temppath\pgfbs@fadepath
+  \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter\pgfbs@temppath\expandafter\expandafter\expandafter{\expandafter\pgfbs@temppath\pgfbs@shadow@bbox}%
+  \pgfsyssoftpath@setcurrentpath{\pgfbs@temppath}%
+  \pgfsyssoftpath@flushcurrentpath%
+  \pgfusepath{#1}%
+}
+%    \end{macrocode}
+%\end{macro}
 %\begin{macro}{\pgfbs@apply@canvas@transform}
 % This achieves the scaling and shifting of the shadow.  It is done by a
 % canvas transform to avoid iterating through a soft path and transforming
@@ -760,6 +792,7 @@ DESCRIPTION:
 %    \begin{macrocode}
 \def\pgfbs@paint@fading{
   \pgfpicture
+  \pgfsetbaseline{\pgf@picminy}%
     % fix bounding box.
     \pgfbs@set@fading@pic@bbox
     % compute increments for line width and opacity
@@ -797,6 +830,64 @@ DESCRIPTION:
       \pgfmathsetmacro\pgfbs@wth{\pgfbs@wth-\pgfbs@wth@step}
       \global\let\pgfbs@wth=\pgfbs@wth
       \pgfmathsetmacro\pgfbs@op{\pgfbs@op+\pgfbs@op@step}
+      \global\let\pgfbs@op=\pgfbs@op
+    }
+    \endscope
+    % a final stroke to hide clip/antialiasing artifcats
+    \pgfsetstrokecolor{black!50!pstb@shadow@color}
+    \pgfsetlinewidth{0.5*\pgfbs@wth@step}
+    \pgfbs@usefadepath{stroke}
+  \endpgfpicture
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\pgfbs@paint@invert@fading}
+% This is an inverse fading.
+%    \begin{macrocode}
+\def\pgfbs@paint@invert@fading{
+  \pgfpicture
+  \pgfsetbaseline{\pgf@picminy}%
+    % fix bounding box.
+    \pgfbs@set@fading@pic@bbox
+    % compute increments for line width and opacity
+    \pgfmathsetmacro\pgfbs@op@step{50/\pgfbs@steps}
+    \pgfmathsetmacro\pgfbs@wth@step{4*\pgfbs@radius/(2*\pgfbs@steps-1)}
+    % draw the outer part of the fading, 
+    % starting with lightest, outermost line
+    \pgfsetroundjoin
+    \pgfmathsetmacro\pgfbs@max@i{\pgfbs@steps-2}
+    \pgfmathsetmacro\pgfbs@wth{2*\pgfbs@radius}
+    \pgfmathsetmacro\pgfbs@op{0.5*\pgfbs@op@step}
+    \foreach \pgfbs@i in {0,...,\pgfbs@max@i} {
+      \pgfsetlinewidth{\pgfbs@wth pt}
+      \pgfsetstrokecolor{black!\pgfbs@op!pstb@shadow@color}
+      \pgfbs@usefadepath{stroke}
+      \pgfmathsetmacro\pgfbs@wth{\pgfbs@wth-\pgfbs@wth@step}
+      \global\let\pgfbs@wth=\pgfbs@wth
+      \pgfmathsetmacro\pgfbs@op{\pgfbs@op+\pgfbs@op@step}
+      \global\let\pgfbs@op=\pgfbs@op
+    }
+    % clip to inside of path
+    \scope
+    \pgfseteorule
+    \pgfbs@usefadeandbbox{clip}
+    % fill inside with final darkest shadow color
+    \pgfsetfillcolor{pstb@shadow@color}
+    \pgfbs@usebbox{fill}
+    \endscope
+    \scope
+    \pgfbs@usefadepath{clip}
+    % draw the inner part of the fading,
+    % starting with the darkest, innermost line
+    \pgfmathsetmacro\pgfbs@wth{2*\pgfbs@radius}
+    \pgfmathsetmacro\pgfbs@op{100-0.5*\pgfbs@op@step}
+    \foreach \pgfbs@i in {0,...,\pgfbs@max@i} {
+      \pgfsetlinewidth{\pgfbs@wth pt}
+      \pgfsetstrokecolor{black!\pgfbs@op!pstb@shadow@color}
+      \pgfbs@usefadepath{stroke}
+      \pgfmathsetmacro\pgfbs@wth{\pgfbs@wth-\pgfbs@wth@step}
+      \global\let\pgfbs@wth=\pgfbs@wth
+      \pgfmathsetmacro\pgfbs@op{\pgfbs@op-\pgfbs@op@step}
       \global\let\pgfbs@op=\pgfbs@op
     }
     \endscope
