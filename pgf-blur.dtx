@@ -11,6 +11,7 @@
 \askforoverwritefalse
 \preamble
 Copyright 2012 Martin Giese, martingi@ifi.uio.no
+Copyright 2012 Andrew Stacey
 
 This file is under the LaTeX Project Public License 
 See CTAN archives in directory macros/latex/base/lppl.txt.
@@ -67,7 +68,7 @@ DESCRIPTION:
 %</driver>
 %\fi
 %
-% \CheckSum{456}
+% \CheckSum{475}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -88,17 +89,21 @@ DESCRIPTION:
 %
 % \changes{v1.00}{2012/04/20}{First public release. (mg)}
 % \changes{v1.01}{2012/04/24}{Remove antialiasing/clipping artefacts (mg)}
+% \changes{v1.02}{2012/12/09}{Fix multiple shadows, support inversion (as)}
 %
 % \DoNotIndex{\!,\",\#,\$,\%,\&,\',\(,\+,\*,\,,\-,\.,\/,\:,\;,\<,\=,\>,\?}
 % \setcounter{IndexColumns}{2}
 %
 % \title{\textsf{pgf-blur} package \\ version \fileversion}
-% \author{Martin Giese\thanks{\protect\url{martingi@ifi.uio.no}}}
+% \author{Martin Giese}
 % \date{\filedate}
 % \maketitle
 %
 %\def\tikzname{Ti\emph{k}Z}
 %
+%\begin{center}
+%  Currently maintained by Norbert Preining\footnote{\protect\url{https://github.com/norbusan/pgf-blur}}
+%\end{center}
 %
 %\begin{center}
 %  \small \textbf{Acknowledgement}\\ This package evolved from a discussion
@@ -466,8 +471,8 @@ DESCRIPTION:
 % import the original shadow code for the offset and scale parameters.
 %    \begin{macrocode}
 %<*texfile>
-\def\fileversion{1.01}
-\def\filedate{2012/04/24}
+\def\fileversion{1.02}
+\def\filedate{2012/12/09}
 \message{ v\fileversion, \filedate}
 \usetikzlibrary{shadows}
 \usetikzlibrary{calc}
