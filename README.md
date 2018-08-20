@@ -35,6 +35,7 @@ The original version was developed by Martin Giese:
 who handed over maintainership to Norbert Preining in 2018
 
 Message-Id: <BDCE3150-A170-4AC9-B1E3-2903DA9D390F@ifi.uio.no>
+
 	Ich finde es gut, wenn sich jemand um die Verbesserung der package kümmern möchte.
 	Wenn du willst kannst du gerne die Rolle des Maintainers übernehmen.  Ich werde
 	selber wahrscheinlich keine Zeit mehr haben, mich darum zu kümmern.  So lange
