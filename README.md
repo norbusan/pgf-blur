@@ -16,9 +16,9 @@ developed at https://github.com/norbusan/pgf-blur
 License and Copyright
 ---------------------
 
-Copyright 2012 Martin Giese, martingi@ifi.uio.no
-Copyright 2012 Andrew Stacey
-Copyright 2018 Norbert Preining, norbert@preining.info
+	Copyright 2012 Martin Giese, martingi@ifi.uio.no
+	Copyright 2012 Andrew Stacey
+	Copyright 2018 Norbert Preining, norbert@preining.info
 
 This file is under the LaTeX Project Public License 
 See CTAN archives in directory macros/latex/base/lppl.txt.
