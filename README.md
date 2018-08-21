@@ -13,6 +13,21 @@ Development
 Martin Giese has stopped working on pgf-blur and pgf-blur is now
 developed at https://github.com/norbusan/pgf-blur
 
+Issues and Bugs
+---------------
+
+Please report issues to https://github.com/norbusan/pgf-blur/issues
+
+Currently (as of TL2018) multiple drop shadows can produce problems
+with xelatex (dvipdfmx) when including a pdf with drop shadows into
+another pdf. A typical error is
+
+	xdvipdfmx:fatal: Loop in object hierarchy detected. Broken PDF file?
+
+This will be fixed in TL2019 with an update to dvipdfmx. luatex and pdftex
+do not exhibit this problem.
+
+
 License and Copyright
 ---------------------
 
